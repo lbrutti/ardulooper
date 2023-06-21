@@ -21,40 +21,47 @@
 
   http://www.arduino.cc/en/Tutorial/Blink
 */
-#define LOOPER 0
-#define LED_BUILTIN 1
+#define LOOPER   2
+#define FLUSH   14
+#define STOP  15
+#define TOGGLE  16
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LOOPER, OUTPUT);
-  //stop e cancella
-  clear();
 
-  //registra
-  delay(500);
+  pinMode(FLUSH, INPUT_PULLUP);
+  pinMode(STOP, INPUT_PULLUP);
+  pinMode(TOGGLE, INPUT_PULLUP);
+
+  Serial.begin(9600);
+
 }
 
 // the loop function runs over and over again forever
 void loop() {
 
+  if (digitalRead(FLUSH) == LOW) {
+    Serial.println("FLUSHING...");
+    clear();
+    Serial.println("FLUSHED!");
 
-  press(25);
-  delay(5000);
+  }
 
-  //play
-  press(25);
-  delay(2000);
+  else if (digitalRead(STOP) == LOW) {
+    Serial.println("STOPPING...");
+    stop();
+    Serial.println("STOPPED!");
 
-  //overdub per 500 ms
-  press(25);
-  delay(1000);
-
-  //play
-  press(25);
-  delay(10000);
-
+  }
+  else if (digitalRead(TOGGLE) == LOW) {
+    Serial.println("TOGGLING...");
+    press(25);
+    delay(500);
+    Serial.println("TOGGLED!");
+  }
 }
 
 void press(int time) {
@@ -64,13 +71,18 @@ void press(int time) {
   delay(time);                       // wait for a second
   digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
   digitalWrite(LOOPER, LOW);
+  delay(time);
 }
 
 void clear() {
+  stop();
+  press(1500);
+}
+
+void stop() {
   press(25);
   delay(250);
 
   press(25);
   delay(250);
-  press(1500);
 }
